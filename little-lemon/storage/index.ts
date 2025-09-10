@@ -2,7 +2,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //struct with predefined keys and values
-const KEYS = {
+export const KEYS = {
   isloggedin: "isloggedin",
   name: "name",
   email: "email",
@@ -14,6 +14,7 @@ const KEYS = {
   emailNotifications_passwordReset: "emailNotifications_passwordReset",
   emailNotifications_specialOffers: "emailNotifications_specialOffers",
   emailNotifications_newsletter: "emailNotifications_newsletter",
+  databaseSeeded: "databaseSeeded",
 };
 
 //this function is made to store data in async storage
