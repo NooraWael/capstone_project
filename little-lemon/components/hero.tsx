@@ -1,11 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
 
 interface HeroSectionProps {
   showSearchBar?: boolean;
+  onSearchChange?: (text: string) => void;
+  searchValue?: string;
 }
 
-export default function HeroSection({ showSearchBar = false }: HeroSectionProps) {
+export default function HeroSection({ 
+  showSearchBar = true, 
+  onSearchChange,
+  searchValue = ''
+}: HeroSectionProps) {
+  const [isSearchActive, setIsSearchActive] = useState(false);
+
+  const handleSearchIconPress = () => {
+    setIsSearchActive(true);
+  };
+
+  const handleCloseSearch = () => {
+    setIsSearchActive(false);
+    if (onSearchChange) {
+      onSearchChange('');
+    }
+  };
+
+  const handleSearchChange = (text: string) => {
+    if (onSearchChange) {
+      onSearchChange(text);
+    }
+  };
+
   return (
     <View style={styles.heroSection}>
       <View style={styles.heroContent}>
@@ -17,9 +42,32 @@ export default function HeroSection({ showSearchBar = false }: HeroSectionProps)
         
         {showSearchBar && (
           <View style={styles.searchContainer}>
-            <View style={styles.searchIcon}>
-              <Text style={styles.searchText}>🔍</Text>
-            </View>
+            {!isSearchActive ? (
+              <TouchableOpacity 
+                style={styles.searchIcon} 
+                onPress={handleSearchIconPress}
+              >
+                <Text style={styles.searchText}>🔍</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.searchInputContainer}>
+                <Text style={styles.searchIconInInput}>🔍</Text>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search menu items..."
+                  placeholderTextColor="#666"
+                  value={searchValue}
+                  onChangeText={handleSearchChange}
+                  autoFocus={true}
+                />
+                <TouchableOpacity 
+                  style={styles.closeButton}
+                  onPress={handleCloseSearch}
+                >
+                  <Text style={styles.closeText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -80,5 +128,39 @@ const styles = StyleSheet.create({
   },
   searchText: {
     fontSize: 20,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    minHeight: 50,
+  },
+  searchIconInInput: {
+    fontSize: 18,
+    marginRight: 10,
+    color: '#666',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    paddingVertical: 0, // Remove default padding on Android
+  },
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  closeText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: 'bold',
   },
 });

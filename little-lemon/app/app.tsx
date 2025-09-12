@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Header from '../components/header';
 import HeroSection from '../components/hero';
@@ -15,6 +16,7 @@ export default function MenuScreen() {
   const [categories, setCategories] = useState<string[]>(['Starters', 'Mains', 'Desserts', 'Drinks']);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     initializeDatabase();
@@ -22,7 +24,7 @@ export default function MenuScreen() {
 
   useEffect(() => {
     filterMenuItems();
-  }, [selectedCategory, allMenuItems]);
+  }, [selectedCategory, allMenuItems, searchText]);
 
   const initializeDatabase = async () => {
     try {
@@ -76,9 +78,21 @@ export default function MenuScreen() {
   };
 
   const filterMenuItems = () => {
-    const filtered = allMenuItems.filter(
-      item => item.category.toLowerCase() === selectedCategory.toLowerCase()
-    );
+    let filtered = allMenuItems;
+
+    // Filter by search text if provided
+    if (searchText.trim()) {
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchText.toLowerCase())
+      );
+    } else {
+      // Only filter by category if no search text
+      filtered = filtered.filter(
+        item => item.category.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
     setMenuItems(filtered);
   };
 
@@ -89,6 +103,11 @@ export default function MenuScreen() {
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
+    setSearchText(''); // Clear search when changing categories
+  };
+
+  const handleSearchChange = (text: string) => {
+    setSearchText(text);
   };
 
   if (loading) {
@@ -119,13 +138,29 @@ export default function MenuScreen() {
     <SafeAreaView style={styles.container}>
       <Header showProfile={true} />
       
-      <HeroSection showSearchBar={true} />
-      
-      <CategoryTabs
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategorySelect={handleCategorySelect}
+      <HeroSection 
+        showSearchBar={true} 
+        onSearchChange={handleSearchChange}
+        searchValue={searchText}
       />
+      
+      {/* Only show categories when not searching */}
+      {!searchText.trim() && (
+        <CategoryTabs
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={handleCategorySelect}
+        />
+      )}
+      
+      {/* Show search results info */}
+      {searchText.trim() && (
+        <View style={styles.searchResultsContainer}>
+          <Text style={styles.searchResultsText}>
+            {menuItems.length} results for "{searchText}"
+          </Text>
+        </View>
+      )}
       
       <MenuList
         menuItems={menuItems}
@@ -169,5 +204,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#495E57',
     textDecorationLine: 'underline',
+  },
+  searchResultsContainer: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  searchResultsText: {
+    fontSize: 16,
+    color: '#495E57',
+    fontWeight: '600',
   },
 });

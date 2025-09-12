@@ -69,6 +69,8 @@ export default function App() {
       
       // Store user data
       await storeData(KEYS.name, name.trim());
+      await storeData(KEYS.firstName, name.trim().split(" ")[0]);
+      await storeData(KEYS.lastName, name.trim().split(" ").slice(1).join(" "));
       await storeData(KEYS.email, email.trim());
       await storeData(KEYS.isloggedin, "true");
       
